@@ -11,17 +11,17 @@ public class ResultPrinter {
     
     private ResultPrinter(){}
 
-    private static String printHeader(List<String> headers){
+    private static String printHeader(List<String> headers, int[] widths){
 
         return headers.stream()
-            .map(e -> String.format("%-10s", "| " + e + " |"))
+            .map(e -> "| " + String.format("%-" +  e.length() + "s", e) + " ")
             .collect(Collectors.joining(""));
     }
 
-    private static String separatorLine(List<String> headers) {
+    private static String separatorLine(List<String> headers, int[] widths) {
         
         return headers.stream()
-            .map(e -> String.format("%-10s", "-".repeat(e.length() + 2)))
+            .map(e -> "-".repeat(e.length() + 2))
             .collect(Collectors.joining("+", "+", "+"));
     }
 
@@ -31,8 +31,14 @@ public class ResultPrinter {
 
         List<String> columns =  new ArrayList<>(result.get(0).keySet());
 
-        System.out.println(printHeader(columns));
-        System.out.println(separatorLine(columns));
+        
+        int[] widthHeaders = widthHeaders(columns);
+        
+        widthHeaders = widths(widthHeaders, columns, result);
+        
+        System.out.println(printHeader(columns, widthHeaders));
+        
+        System.out.println(separatorLine(columns, widthHeaders));
 
         for (int rowIndex = 0; rowIndex < result.size(); rowIndex++) {
             
@@ -40,14 +46,41 @@ public class ResultPrinter {
 
                 Object value = result.get(rowIndex).get(columns.get(columnIndex));
 
-                System.out.print(String.format("%-10s", "| " + (value == null ? "null" : value) + " |"));
+                System.out.print("|" + String.format("%-" + widthHeaders[columnIndex] + "s", value));
             }
 
-            System.out.println();
+            System.out.println("|");
         }
 
 
         System.out.println();
         System.out.println(result.size() + " row(s)");
+    }
+
+    private static int[] widthHeaders(List<String> headers){
+        int[] width = new int[headers.size()];
+
+        for (int i = 0; i < width.length; i++) {
+            width[i] = headers.get(i).length();
+        }
+        
+        return  width;
+    }
+
+    private static int[] widths(int[] widthHeaders, List<String> columns, List<Map<String, Object>> result){
+        
+        for (int rowIndex = 0; rowIndex < result.size(); rowIndex++) {
+            
+            for (int columnIndex = 0; columnIndex < widthHeaders.length; columnIndex++) {
+
+                Object value = result.get(rowIndex).get(columns.get(columnIndex));
+
+                widthHeaders[columnIndex] = Math.max(widthHeaders[columnIndex], String.valueOf(value).length());
+            }
+
+            System.out.println("|");
+        }
+
+        return widthHeaders;
     }
 }
