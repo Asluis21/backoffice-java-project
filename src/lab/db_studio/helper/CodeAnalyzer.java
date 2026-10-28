@@ -1,6 +1,7 @@
 package lab.db_studio.helper;
 
 import java.sql.SQLException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import lab.db_studio.exceptions.UnkownEngineException;
@@ -42,6 +43,8 @@ public class CodeAnalyzer {
         "\\b(true|false|null|undefined)\\b)"
     );
 
+    private static final int MIN_MARGIN =2;
+
     public static Engine verifyCode(String code) throws SQLException{
         
         String cleanCode = clean(code).strip();
@@ -51,7 +54,6 @@ public class CodeAnalyzer {
 
         if(isJS && !isSQL){
 
-            System.out.println("JS CODE");
             return JavascriptEngine.getInstance();
         }
         
@@ -60,20 +62,29 @@ public class CodeAnalyzer {
             return SQLEngine.getInstance();
         }
 
-        isJS = JS_PATTERN.matcher(cleanCode).find();
-        isSQL = SQL_PATTERN.matcher(cleanCode).find();
 
-        if(isJS && !isSQL){
 
-            return JavascriptEngine.getInstance();
+        int sqlMatchCount = 0;
+        int jsMatchCount = 0;
+
+        Matcher jsMatcher = JS_PATTERN.matcher(cleanCode);
+        Matcher sqlMatcher = SQL_PATTERN.matcher(cleanCode);
+
+        while (jsMatcher.find()) {
+            jsMatchCount++;
         }
+
+        while (sqlMatcher.find()) {
+            sqlMatchCount++;
+        }
+
+        int diff = jsMatchCount - sqlMatchCount; 
+
+        if(diff >= MIN_MARGIN) return JavascriptEngine.getInstance();
+        if(-diff >= MIN_MARGIN) return  SQLEngine.getInstance();
         
-        if(isSQL && !isJS){
-            
-            return  SQLEngine.getInstance();
-        }
-
         throw new UnkownEngineException("Cannot identify the language");
+
     }
 
     private static String clean(String code){

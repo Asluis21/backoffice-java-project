@@ -14,6 +14,7 @@ public abstract class Result {
     private String errorCause;
 
     private List<Map<String, Object>> resultSet = new ArrayList<>();
+    private String[] columns;
     private int executeRowsAffected;
 
     public Result() {}
@@ -52,6 +53,15 @@ public abstract class Result {
 
     public Boolean hasResultSet(){
         return this.hasResultSet;
+    }
+
+    public void setColumns(String[] columns){
+        this.columns = columns;
+        hasResultSet = true;
+    }
+
+    public String[] getColumns(){
+        return columns;
     }
 }
 

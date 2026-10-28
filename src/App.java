@@ -4,6 +4,7 @@ import lab.db_studio.entity.Dbstudio;
 import lab.db_studio.entity.Result;
 import lab.db_studio.helper.CodeAnalyzer;
 import lab.db_studio.helper.ResultPrinter;
+import lab.db_studio.service.Engine;
 
 public class App {
     public static void main(String[] args) throws Exception {
@@ -27,7 +28,11 @@ public class App {
 
             try {
                 
-                new Dbstudio(CodeAnalyzer.verifyCode(input));
+                Engine engine = CodeAnalyzer.verifyCode(input);
+                System.out.println(engine.getClass().getSimpleName());
+
+                Dbstudio dbstudio = new Dbstudio(engine);
+                
 
             } catch (Exception e) {
                 System.out.println(e.getMessage());
@@ -40,13 +45,16 @@ public class App {
             
             try {
                 
-                Dbstudio dbstudio = new Dbstudio(CodeAnalyzer.verifyCode(input));
+                Engine engine = CodeAnalyzer.verifyCode(input);
+                System.out.println(engine.getClass().getSimpleName());
+
+                Dbstudio dbstudio = new Dbstudio(engine);
                 
                 Result sqlResult = dbstudio.actions.execute(input);
     
                 if(sqlResult.hasResultSet()){
     
-                    ResultPrinter.printInConsole(sqlResult.getResultSet());
+                    ResultPrinter.printInConsole(sqlResult.getColumns(), sqlResult.getResultSet());
                 }else{
                     System.out.println(sqlResult.getRowsAffected());
                 }

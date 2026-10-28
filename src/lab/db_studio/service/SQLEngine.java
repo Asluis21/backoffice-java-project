@@ -15,21 +15,29 @@ import lab.db_studio.entity.SQLResult;
 
 public class SQLEngine implements Engine{
 
-    private final static SQLEngine INSTANCE = new SQLEngine(); 
+    private static final SQLEngine INSTANCE = new SQLEngine(); 
     private final Connection connection;
 
     @Override
-    public SQLResult execute(String code) throws SQLException {
+    public SQLResult execute(String code) {
 
         SQLResult sqlResult = new SQLResult();
 
         try (Statement statement = connection.createStatement()) {
             
-            Boolean hasResultSet = statement.execute(code);
+            boolean hasResultSet = statement.execute(code);
 
             if (hasResultSet) {
                 
-                sqlResult.setResultSet(formateResultSet(statement.getResultSet()));
+                ResultSet rs = statement.getResultSet();
+
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnsCount = metaData.getColumnCount();
+
+                sqlResult.setColumns(getColumns(columnsCount, metaData));
+                sqlResult.setResultSet(formateResultSet(rs, sqlResult.getColumns()));
+
+
             }else{
                 sqlResult.setExecuteRowsAffected(statement.getUpdateCount());
             }
@@ -49,58 +57,38 @@ public class SQLEngine implements Engine{
         }
     }
 
-    public static SQLEngine getInstance() throws SQLException{
+    public static SQLEngine getInstance() {
         return INSTANCE;
     }
 
-    private List<Map<String, Object>> formateResultSet(ResultSet rs) throws SQLException{
+    private String[] getColumns(int totalColumns, ResultSetMetaData metaData) throws SQLException {
         
-        ResultSetMetaData metaData = rs.getMetaData();
-        int columnsCount = metaData.getColumnCount();
+        if (totalColumns <= 0) return new String[0];
+
+        String[] columns = new String[totalColumns];
+
+        for (int i = 0; i < totalColumns; i++) {
+            columns[i] = metaData.getColumnLabel(i);       
+        } 
+
+        return columns;
+    }
+
+    private List<Map<String, Object>> formateResultSet(ResultSet rs, String[] columns) throws SQLException{
         
-        List<String> columns = new ArrayList<>();
-        
-        String columnNameIteration;
-        
-        if (!rs.next()) {
-            
-            List<Map<String, Object>> formatResult = new ArrayList<>();
-
-            Map<String, Object> row = new LinkedHashMap<>();
-            
-            for(int i = 1; i<= columnsCount; i++){
-                row.put(metaData.getColumnLabel(i), "");
-            }
-
-            formatResult.add(row);
-            
-            return formatResult;
-
-        }else{
-
-            for(int i = 1; i<= columnsCount; i++){
-                columnNameIteration = metaData.getColumnLabel(i);
-                columns.add(columnNameIteration);
-            }
-        }
-
-
-        System.out.println();
-
         List<Map<String, Object>> formatResult = new ArrayList<>();
-
-        do {
+        
+        while (rs.next()) {
+            
             Map<String, Object> row = new LinkedHashMap<>();
-            Object columnValue = null;
     
-            for(String column : columns){
-                columnValue = rs.getObject(column);
-                row.put(column, columnValue);
+            for (int i = 0; i <= columns.length; i++) {
+                row.put(columns[i], rs.getObject(i));
             }
-            
+
             formatResult.add(row);
-            
-        } while (rs.next());
+
+        }
 
         return formatResult;
     }
