@@ -53,16 +53,15 @@ public class CodeAnalyzer {
         boolean isSQL = SQL_START_PATTERN.matcher(cleanCode).find();
 
         if(isJS && !isSQL){
-
+            System.out.println("JavascriptEngine");
             return JavascriptEngine.getInstance();
         }
         
         if(isSQL && !isJS){
+            System.out.println("SQLEngine");
             
             return SQLEngine.getInstance();
         }
-
-
 
         int sqlMatchCount = 0;
         int jsMatchCount = 0;
@@ -80,6 +79,7 @@ public class CodeAnalyzer {
 
         int diff = jsMatchCount - sqlMatchCount; 
 
+        System.out.println(diff >= MIN_MARGIN);
         if(diff >= MIN_MARGIN) return JavascriptEngine.getInstance();
         if(-diff >= MIN_MARGIN) return  SQLEngine.getInstance();
         

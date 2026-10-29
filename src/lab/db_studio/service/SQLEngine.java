@@ -67,8 +67,8 @@ public class SQLEngine implements Engine{
 
         String[] columns = new String[totalColumns];
 
-        for (int i = 0; i < totalColumns; i++) {
-            columns[i] = metaData.getColumnLabel(i);       
+        for (int i = 1; i <= totalColumns; i++) {
+            columns[i-1] = metaData.getColumnLabel(i);       
         } 
 
         return columns;
@@ -82,8 +82,8 @@ public class SQLEngine implements Engine{
             
             Map<String, Object> row = new LinkedHashMap<>();
     
-            for (int i = 0; i <= columns.length; i++) {
-                row.put(columns[i], rs.getObject(i));
+            for (int i = 1; i <= columns.length; i++) {
+                row.put(columns[i-1], rs.getObject(i));
             }
 
             formatResult.add(row);
