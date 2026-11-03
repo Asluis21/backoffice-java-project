@@ -1,7 +1,5 @@
 package lab.db_studio.service;
 
-import java.sql.SQLException;
-
 import lab.db_studio.entity.Result;
 
 /**
@@ -9,5 +7,5 @@ import lab.db_studio.entity.Result;
  */
 public interface Engine {
 
-    Result execute(String code) throws SQLException;
+    Result execute(String code);
 }
