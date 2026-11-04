@@ -4,6 +4,7 @@ import lab.db_studio.entity.Dbstudio;
 import lab.db_studio.entity.Result;
 import lab.db_studio.helper.CodeAnalyzer;
 import lab.db_studio.helper.ResultPrinter;
+import lab.db_studio.rest.ServerConfig;
 import lab.db_studio.service.Engine;
 
 public class App {
@@ -66,6 +67,8 @@ public class App {
             }
         }
 
+
+        ServerConfig.initServer();
     }
 
 }

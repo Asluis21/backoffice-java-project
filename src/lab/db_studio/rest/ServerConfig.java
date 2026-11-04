@@ -3,37 +3,33 @@ package lab.db_studio.rest;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
-public class ServerConfig {
+import lab.db_studio.rest.controller.QueryController;
 
+public class ServerConfig {
+    
     private static final int PORT = 8080;
     private HttpServer httpServer;
 
     private ServerConfig() throws IOException {
-        httpServer = HttpServer.create(
-            new InetSocketAddress(PORT), 0
-        );
+        this.httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
     }
 
-    private static class Holder {
-        private static final ServerConfig INSTANCE;
+    public static ServerConfig initServer() throws IOException{
+        ServerConfig sc = new ServerConfig()
+            .addContext(QueryController.CONTEXT_PATH, new QueryController());
 
-        static {
-            try {
-                INSTANCE = new ServerConfig();
-            } catch (IOException e) {
-                throw new ExceptionInInitializerError(e);
-            }
-        }
+        sc.httpServer.start();
+
+        return sc;
     }
 
-    public static ServerConfig initServer() {
-        return Holder.INSTANCE;
-    }
-
-    public ServerConfig addContext(String context) {
-        httpServer.createContext(context);
+    private ServerConfig addContext(String path, Object handler){
+        //httpServer.createContext(path, handler);
         return this;
     }
+
+
 }
