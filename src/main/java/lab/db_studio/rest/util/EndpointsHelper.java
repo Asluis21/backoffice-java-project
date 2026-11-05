@@ -1,4 +1,4 @@
-package lab.db_studio.rest;
+package lab.db_studio.rest.util;
 
 import java.lang.reflect.Method;
 
