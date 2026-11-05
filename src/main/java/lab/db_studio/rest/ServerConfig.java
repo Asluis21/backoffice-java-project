@@ -6,7 +6,6 @@ import java.net.InetSocketAddress;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
-import lab.db_studio.rest.controller.QueryController;
 
 public class ServerConfig {
     
@@ -19,15 +18,15 @@ public class ServerConfig {
 
     public static ServerConfig initServer() throws IOException{
         ServerConfig sc = new ServerConfig()
-            .addContext(QueryController.CONTEXT_PATH, new QueryController());
+            .addContext("/api", new Router());
 
         sc.httpServer.start();
 
         return sc;
     }
 
-    private ServerConfig addContext(String path, Object handler){
-        //httpServer.createContext(path, handler);
+    private ServerConfig addContext(String path, HttpHandler handler){
+        httpServer.createContext(path, handler);
         return this;
     }
 
